@@ -1,8 +1,5 @@
 #include "server.h"
-
-#include <QXmlStreamReader>
-#include <QCryptographicHash>
-#include <QTimer>
+#include "sqlliteDB.h"
 
 
 Server::Server() {
@@ -13,19 +10,32 @@ Server::Server() {
 
 }
 
-Server::Server(QString dirForFiles) {
+Server::Server(QString dirForFiles, QString pathFileDb) {
     this->dirForFiles = dirForFiles;
+    db.setPath(pathFileDb);
 }
 
 void Server::runServer()
 {
     cout << "Server run" << endl;
     cout << qPrintable(dirForFiles) << endl;
-    QTimer* timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
-    timer->start(10000);
+    QFileInfoList files = this->getFiles();
+    for (int i = 0; i < files.size(); ++i) {
+        QFileInfo fileInfo = files.at(i);
+        QString patfFile = QString("%1/%2").arg(fileInfo.path()).arg(fileInfo.fileName());
+        QString hashFile = getHashFile(patfFile);
 
+        QString query = SELECT_FILE;
+        query = query.arg(fileInfo.fileName() + QString("dd"));
 
+        QVector<QVector<QString>> result = db.runQuerySelect(query);
+        cout << result.size() << endl;
+    }
+
+//    QVector<QString> a = db.runQuerySelect(query);
+//    QTimer* timer = new QTimer(this);
+//    connect(timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
+//    timer->start(10000);
 }
 
 void Server::incomingConnection(qintptr socketDescriptor){
@@ -36,7 +46,6 @@ void Server::incomingConnection(qintptr socketDescriptor){
     Sockets.push_back(socket);
     qDebug() << "client connected" << socketDescriptor;
 }
-
 
 void Server::slotReadyRead(){
     socket = (QTcpSocket*)sender();
@@ -89,53 +98,72 @@ void Server::parsingXml(QFileInfoList files)
         }
         QXmlStreamReader xml(file);
         QString alldata;
-        while (!xml.atEnd() && !xml.hasError())
-        {
 
-            QXmlStreamReader::TokenType token = xml.readNext();
-            if (token == QXmlStreamReader::StartDocument)
-                continue;
-            if (token == QXmlStreamReader::StartElement)
-            {
-                if (xml.name() == "net")
-                    continue;
-                if (xml.name() == "block"){
-                    cout << "block: ";
-                     QXmlStreamAttributes attrib = xml.attributes();
-                     for (int i = 0; i < attrib.size(); i++){
-                         QString s = QString("%1: %2; ").arg(attrib[i].name()).arg(attrib[i].value());
-                         cout << qPrintable(s);
-                         alldata += s;
-                     }
-                     cout << endl;
+        QString str_insert = "INSERT INTO files(name, path, hash) "
+                             "VALUES ('%1', '%2', '%3');";
+
+        str_insert = str_insert.arg(fileInfo.fileName())
+                .arg(fileInfo.path());
+
+                while (!xml.atEnd() && !xml.hasError())
+                {
+
+                    QXmlStreamReader::TokenType token = xml.readNext();
+                    if (token == QXmlStreamReader::StartDocument)
+                        continue;
+                    if (token == QXmlStreamReader::StartElement)
+                    {
+                        if (xml.name() == "net")
+                            continue;
+                        if (xml.name() == "block"){
+//                            cout << "block: ";
+                             QXmlStreamAttributes attrib = xml.attributes();
+                             for (int i = 0; i < attrib.size(); i++){
+                                 QString s = QString("%1: %2; ").arg(attrib[i].name()).arg(attrib[i].value());
+//                                 cout << qPrintable(s);
+                                 alldata += s;
+                             }
+//                             cout << endl;
+                        }
+                        if (xml.name() == "board"){
+//                            cout << "\tboard: ";
+                             QXmlStreamAttributes attrib = xml.attributes();
+                             for (int i = 0; i < attrib.size(); i++){
+                                 QString s = QString("%1: %2; ").arg(attrib[i].name()).arg(attrib[i].value());
+//                                 cout << qPrintable(s);
+                                 alldata += s;
+                             }
+//                             cout << endl;
+                        }
+                        if (xml.name() == "port"){
+//                            cout << "\t\tport: ";
+                             QXmlStreamAttributes attrib = xml.attributes();
+                             for (int i = 0; i < attrib.size(); i++){
+                                 QString s = QString("%1: %2; ").arg(attrib[i].name()).arg(attrib[i].value());
+//                                 cout << qPrintable(s);
+                                 alldata += s;
+                             }
+//                             cout << endl;
+                        }
+                    }
                 }
-                if (xml.name() == "board"){
-                    cout << "\tboard: ";
-                     QXmlStreamAttributes attrib = xml.attributes();
-                     for (int i = 0; i < attrib.size(); i++){
-                         QString s = QString("%1: %2; ").arg(attrib[i].name()).arg(attrib[i].value());
-                         cout << qPrintable(s);
-                         alldata += s;
-                     }
-                     cout << endl;
-                }
-                if (xml.name() == "port"){
-                    cout << "\t\tport: ";
-                     QXmlStreamAttributes attrib = xml.attributes();
-                     for (int i = 0; i < attrib.size(); i++){
-                         QString s = QString("%1: %2; ").arg(attrib[i].name()).arg(attrib[i].value());
-                         cout << qPrintable(s);
-                         alldata += s;
-                     }
-                     cout << endl;
-                }
-            }
-        }
         QString hash = QString("%1").arg(QString(QCryptographicHash::hash(alldata.toUtf8(),QCryptographicHash::Sha1).toHex()));
-        cout << qPrintable(hash) << endl;
-        //1ef9dfb922fe398db9997973278e226cc468a87c
-        //a0a44027b432749349f13c08f9230cca907c33b3
-        //1ef9dfb922fe398db9997973278e226cc468a87c
+        str_insert = str_insert.arg(hash);
+        bool resilt = db.runQueryInsert(str_insert);
+        cout << resilt << endl;
     }
+}
+
+QString Server::getHashFile(QString pathFile)
+{
+    QString hashStr = "";
+    QFile f(pathFile);
+    if (f.open(QFile::ReadOnly)) {
+        QCryptographicHash hash(QCryptographicHash::Sha1);
+        if (hash.addData(&f)) {
+            hashStr += QString(hash.result().toHex());
+        }
+    }
+    return hashStr;
 }
 

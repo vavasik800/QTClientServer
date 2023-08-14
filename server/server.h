@@ -5,26 +5,37 @@
 #include <QDataStream>
 #include <QFileInfoList>
 #include <QDir>
+#include <QXmlStreamReader>
+#include <QCryptographicHash>
+#include <QTimer>
+#include <QtSql>
+#include <QSqlDatabase>
 #include <iostream>
 
+#include "sqlliteDB.h"
+#include "sqlQueries.h"
+
 using namespace std;
+
+class SqlLiteDb;
 
 class Server : public QTcpServer {
     Q_OBJECT
 public:
     QTcpSocket *socket;
-
     Server();
-    Server(QString dirForFiles);
+    Server(QString dirForFiles, QString pathFileDb);
     void runServer();
 
 private:
     QVector <QTcpSocket*> Sockets;
     QByteArray Data;
     QString dirForFiles;
+    SqlLiteDb db;
     void SendToClient(QString str);
     QFileInfoList getFiles();
     void parsingXml(QFileInfoList files);
+    QString getHashFile(QString pathFile);
 
 
 public slots:

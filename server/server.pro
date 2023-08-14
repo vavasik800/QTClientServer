@@ -1,5 +1,5 @@
 QT -= gui
-QT += core network xml
+QT += core network xml sql
 
 
 CONFIG += c++11 console
@@ -18,7 +18,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        server.cpp
+        server.cpp \
+        sqlliteDB.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -26,4 +27,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    server.h
+    server.h \
+    sqlQueries.h \
+    sqlliteDB.h
