@@ -18,6 +18,7 @@ Server::Server(QString dirForFiles, QString pathFileDb) {
 // Проверяет файлы в каталоге на изменения каждые 20 секунд.
 void Server::runServer()
 {
+//    onTimeout();
     QTimer* timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
     timer->start(20000);
