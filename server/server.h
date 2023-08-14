@@ -1,3 +1,12 @@
+/****************************************************************************
+** Copyright (C) 2023 Ruslan_gold.
+**
+** Модуль, описывающий класс Server, который реализует работу сервера для
+** разбора, мониторинга изменений и сохранения дынных из файлов .xml для
+** дальнейшего взаимодействия этих данных с клиентом.
+**
+****************************************************************************/
+
 #ifndef SERVER_H
 #define SERVER_H
 #include <QTcpServer>
@@ -30,13 +39,14 @@ public:
 private:
     QVector <QTcpSocket*> Sockets;
     QByteArray Data;
-    QString dirForFiles;
-    SqlLiteDb db;
+    QString dirForFiles; // путь до каталога с файлами .xml
+    SqlLiteDb db; // экземпляр класса для работы с БД SQLLite
 
-    void SendToClient(QString str);
+    void SendToClient(QVector<QVector<QString>> vector);
 
     QFileInfoList getFiles();
     void workWithFiles(QFileInfoList files);
+    bool workWithOneFile(QString patfFile);
     QVector<QMap<QString, QMap<QString, QString>>> parsingXml(QString pathFile);
     QMap<QString, QString> parsingXmlBlock(QXmlStreamAttributes attrib);
     QVector<QMap<QString, QMap<QString, QString>>> createGoodData(QVector<QMap<QString, QMap<QString, QString>>> data);
