@@ -32,9 +32,14 @@ private:
     QByteArray Data;
     QString dirForFiles;
     SqlLiteDb db;
+
     void SendToClient(QString str);
+
     QFileInfoList getFiles();
-    void parsingXml(QFileInfoList files);
+    void workWithFiles(QFileInfoList files);
+    QVector<QMap<QString, QMap<QString, QString>>> parsingXml(QString pathFile);
+    QMap<QString, QString> parsingXmlBlock(QXmlStreamAttributes attrib);
+    QVector<QMap<QString, QMap<QString, QString>>> createGoodData(QVector<QMap<QString, QMap<QString, QString>>> data);
     QString getHashFile(QString pathFile);
 
 
