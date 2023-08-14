@@ -2,9 +2,9 @@
 #define CFG_H
 
 // путь до каталога с файлом базы данных "SqlLite"
-#define PATH_DB "C:\\Users\\vasil\\git\\QTClientServer\\database.db3"
+#define PATH_DB "..\\database.db3"
 // путь до каталога с файлами xml для из парсинга
-#define PATH_DIR_WITH_XML "C:\\Users\\vasil\\git\\QTClientServer\\test"
+#define PATH_DIR_WITH_XML "..\\test"
 
 
 #endif // CFG_H
