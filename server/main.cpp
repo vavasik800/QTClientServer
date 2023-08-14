@@ -1,13 +1,15 @@
 #include <QCoreApplication>
-#include "server.h"
 #include <iostream>
+
+#include "server.h"
+#include "cfg.h"
 
 using namespace std;
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    Server s("C:\\Users\\Admin\\Documents\\Qt\\server\\test", "C:\\Users\\Admin\\Documents\\Qt\\server\\database.db3");
+    Server s(PATH_DIR_WITH_XML, PATH_DB);
     s.runServer();
     cout << "ГЫ" << endl;
     return a.exec();
