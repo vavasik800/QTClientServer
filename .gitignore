@@ -53,5 +53,6 @@ compile_commands.json
 
 *_qmlcache.qrc
 
+# Test files dir
 test/
 *.db3
