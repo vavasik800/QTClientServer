@@ -42,7 +42,7 @@ private:
     QString dirForFiles; // путь до каталога с файлами .xml
     SqlLiteDb db; // экземпляр класса для работы с БД SQLLite
 
-    void SendToClient(QVector<QVector<QString>> vector);
+    void SendToClient(QMap<QString, QVector<QMap<QString, QString>>> mapResponse);
 
     QFileInfoList getFiles();
     void workWithFiles(QFileInfoList files);

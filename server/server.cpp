@@ -23,12 +23,12 @@ void Server::runServer()
     timer->start(20000);
 }
 
-
-void Server::SendToClient(QVector<QVector<QString>> vector){
+// Метод отправки данных на клиента
+void Server::SendToClient(QMap<QString, QVector<QMap<QString, QString>>> mapResponse){
     Data.clear();
     QDataStream out(&Data, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_14);
-    out << vector;
+    out << mapResponse;
     socket->write(Data);
 }
 
@@ -56,7 +56,7 @@ void Server::workWithFiles(QFileInfoList files)
         QString query = SELECT_FILE;
         query = query.arg(nameFile);
         // запрос данных о наличии данных файлов В БД
-        QVector<QVector<QString>> result = db.runQuery(query, "select");
+        QVector<QMap<QString, QString>> result = db.runQuery(query, "select");
         if (result.size() > 1) {
             cout << "Check DataBase. Double files" << endl;
             return;
@@ -71,7 +71,7 @@ void Server::workWithFiles(QFileInfoList files)
                 continue;
             }
         }
-        else if (result[0][2] == hashFile) {
+        else if (result[0]["hash"] == hashFile) {
             // Случай, когда файл не изменялся (хэши совпадают)
             cout << "Files in BD, Don't shanges." << endl;
             continue;
@@ -219,8 +219,15 @@ void Server::slotReadyRead(){
         qDebug() << "read...";
         QString str;
         in >> str;
-        auto result = db.runQuery(SELECT_BLOCK, "select");
-        SendToClient(result);
+        QMap<QString, QVector<QMap<QString, QString>>> mapResponse;
+        auto tables = QString(TABLES_FOR_SEARCH).split(",");
+        QString tmpSelectQuery = SELECT_ALL;
+        for (auto table: tables){
+            QString selectQuery = tmpSelectQuery.arg(table);
+            auto resultBlock = db.runQuery(selectQuery, "select");
+            mapResponse[table] = resultBlock;
+        }
+        SendToClient(mapResponse);
     }
     else
         qDebug() << "DataStream error";
