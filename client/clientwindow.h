@@ -39,5 +39,6 @@ private:
                       bool isHeader);
 public slots:
     void slotReadyRead();
+    void slotDeleteCon();
 };
 #endif // CLIENTWINDOW_H

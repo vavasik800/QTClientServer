@@ -21,7 +21,7 @@ void Server::runServer()
     onTimeout();
     QTimer* timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
-    timer->start(20000);
+    timer->start(60000);
 }
 
 // Метод отправки данных на клиента

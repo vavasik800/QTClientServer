@@ -10,7 +10,7 @@ ClientWindow::ClientWindow(QWidget *parent)
     ui->setupUi(this);
     socket = new QTcpSocket(this);
     connect(socket, &QTcpSocket::readyRead, this, &ClientWindow::slotReadyRead);
-    connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
+    connect(socket, &QTcpSocket::disconnected, this, &ClientWindow::slotDeleteCon);
 }
 
 ClientWindow::~ClientWindow()
@@ -25,6 +25,11 @@ void ClientWindow::on_pushButton_clicked()
     ui->pushButton->setStyleSheet("background-color: green");
 }
 
+//Слот для удаления подключения
+void ClientWindow::slotDeleteCon() {
+    socket->deleteLater();
+    ui->pushButton->setStyleSheet("background-color: red");
+}
 // Слот считывания ответа от сервера и построения дерева
 void ClientWindow::slotReadyRead()
 {
