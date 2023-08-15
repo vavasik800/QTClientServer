@@ -33,6 +33,16 @@ void ClientWindow::slotReadyRead()
     if (in.status() == QDataStream::Ok){
         QMap<QString, QVector<QMap<QString, QString>>> vector;
         in >> vector;
+        if (vector["block"].size() == 0) {
+            // Случай когда данные пришли пустые
+            QTreeWidgetItem *item = new QTreeWidgetItem();
+            item->setText(0, "No data available! Check database, please.");
+            item->setBackground(0, Qt::red);
+            item->setForeground(0, Qt::yellow);
+            ui->treeWidget->setColumnCount(1);
+            ui->treeWidget->addTopLevelItem(item); // установка заголовка верхнего уровня
+            return;
+        }
         createTree(vector); // построение дерева
     }
 }

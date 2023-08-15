@@ -18,7 +18,7 @@ Server::Server(QString dirForFiles, QString pathFileDb) {
 // Проверяет файлы в каталоге на изменения каждые 20 секунд.
 void Server::runServer()
 {
-//    onTimeout();
+    onTimeout();
     QTimer* timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
     timer->start(20000);
@@ -39,6 +39,14 @@ QFileInfoList Server::getFiles()
     dir.setFilter(QDir::Files);
     dir.cd(dirForFiles);
     QFileInfoList result = dir.entryInfoList(); //получаем список файлов директории
+    for (auto file: result){
+        // просмотр всех файлов на случай если есть не .xml
+        if (file.fileName().mid(file.fileName().size() - 4) != ".xml") {
+            cout << "The directory either does not exist or contains more than .xml files!" << endl;
+            result = QFileInfoList();
+            return result;
+        }
+    }
     return result;
 }
 
@@ -82,14 +90,15 @@ void Server::workWithFiles(QFileInfoList files)
             auto ip = nameFile.mid(0, nameFile.size() - 4);
             query = QString(DELETE_CASKADE_FILE).arg(ip);
             db.runQuery(query, "delete"); // каскадное удаление данных связанных с измененнным файлом
-            // обработка файла
-            if (!workWithOneFile(patfFile)) {
-                cout << "File '%1' is bad! Check file, please!" << endl;
-                continue;
-            }
             // обновление хэша
             query = QString(UPDATE_HASH_FILE).arg(hashFile).arg(nameFile);
             db.runQuery(query, "update");
+            // обработка файла
+            if (!workWithOneFile(patfFile)) {
+                cout << "File is bad! Check file, please!" << endl;
+                continue;
+            }
+
         }
     }
 }
@@ -106,7 +115,12 @@ bool Server::workWithOneFile(QString patfFile)
     auto newDataWithId = createGoodData(dataFromFile); // добавление привязки дочерних элементов к родительским
     for (auto elem: newDataWithId) {
         // добавление данных файла
-        db.runQuery(db.createQuery(elem.keys()[0], elem.value(elem.keys()[0])), "insert");
+        auto result = db.runQuery(db.createQuery(elem.keys()[0], elem.value(elem.keys()[0])), "insert");
+        if (result.size() == 1) {
+            if (result[0].keys()[0] == "error") {
+                return false;
+            }
+        }
     }
     return true;
 }
@@ -243,6 +257,11 @@ void Server::onTimeout()
     }
     cout << "Start read files" << endl;
     QFileInfoList files = this->getFiles();
+    if (files.size() == 0) {
+        // выход в случае если файлов .xml нет или есть другие файлы в каталоге
+        cout << "Error" << endl;
+        return;
+    }
     cout << "Finish read files" << endl;
     workWithFiles(files);
     cout << endl;

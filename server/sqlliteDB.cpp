@@ -83,17 +83,28 @@ bool SqlLiteDb::runQueryUpdate(QString query)
 QVector<QMap<QString, QString>> SqlLiteDb::runQuery(QString query, QString typeQuery)
 {
     QVector<QMap<QString, QString>> result;
+    QMap<QString, QString> error;
     if (typeQuery == "insert"){
-        if(!runQueryInsert(query))
+        if(!runQueryInsert(query)) {
             cout << "Bad Insert!" << endl;
+            error["error"] = "Bad Insert!";
+            result.push_back(error);
+        }
     }
     else if (typeQuery == "update") {
-        if(!runQueryUpdate(query))
+        if(!runQueryUpdate(query)) {
             cout << "Bad Update!" << endl;
+            error["error"] = "Bad Update!";
+            result.push_back(error);
+        }
+
     }
     else if (typeQuery == "delete") {
-        if(!runQueryDelete(query))
+        if(!runQueryDelete(query)) {
             cout << "Bad Delete!" << endl;
+            error["error"] = "Bad Delete!";
+            result.push_back(error);
+        }
     }
     else if (typeQuery == "select") {
         result = runQuerySelect(query);
