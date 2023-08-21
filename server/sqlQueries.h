@@ -18,6 +18,7 @@
 #define SELECT_BLOCK "select id, Name,MtR,MtC,Label,IP,Description,BoardCount from block"
 #define SELECT_ALL "select * from %1"
 
+// запросы для создания таблиц в БД
 #define CREATE_TABLE_FILES "CREATE TABLE files (id   INTEGER PRIMARY KEY AUTOINCREMENT,\
                                                 name TEXT,\
                                                 path TEXT,\
