@@ -1,6 +1,8 @@
 #include "clientwindow.h"
 #include "ui_clientwindow.h"
 
+#include <QTimer>
+
 
 
 ClientWindow::ClientWindow(QWidget *parent)
@@ -9,8 +11,10 @@ ClientWindow::ClientWindow(QWidget *parent)
 {
     ui->setupUi(this);
     socket = new QTcpSocket(this);
+    connect(socket, &QTcpSocket::connected, this, &ClientWindow::checkCon);
     connect(socket, &QTcpSocket::readyRead, this, &ClientWindow::slotReadyRead);
     connect(socket, &QTcpSocket::disconnected, this, &ClientWindow::slotDeleteCon);
+    connect(this, &ClientWindow::checkCon, this, &ClientWindow::slotDeleteCon);
 }
 
 ClientWindow::~ClientWindow()
@@ -22,13 +26,29 @@ ClientWindow::~ClientWindow()
 void ClientWindow::on_pushButton_clicked()
 {
     socket->connectToHost("127.0.0.1", 2323);
+    ui->label->setText("Подключение устанавливается... Проверьте работу сервера и попробуйте еще раз.");
+}
+
+void ClientWindow::checkCon() {
     ui->pushButton->setStyleSheet("background-color: green");
+    ui->label->setText("Подключение установлено.");
+    ui->pushButton_2->setEnabled(true);
+    ui->pushButton->setEnabled(false);
 }
 
 //Слот для удаления подключения
 void ClientWindow::slotDeleteCon() {
     socket->deleteLater();
+    ui->label->setText("Подключение разорвано. Проверьте сервер.");
     ui->pushButton->setStyleSheet("background-color: red");
+    ui->pushButton->setEnabled(true);
+    ui->pushButton_2->setEnabled(false);
+    // создание нового сокета для дальнейшей работы подключения
+    socket = new QTcpSocket(this);
+    connect(socket, &QTcpSocket::connected, this, &ClientWindow::checkCon);
+    connect(socket, &QTcpSocket::readyRead, this, &ClientWindow::slotReadyRead);
+    connect(socket, &QTcpSocket::disconnected, this, &ClientWindow::slotDeleteCon);
+    connect(this, &ClientWindow::checkCon, this, &ClientWindow::slotDeleteCon);
 }
 // Слот считывания ответа от сервера и построения дерева
 void ClientWindow::slotReadyRead()

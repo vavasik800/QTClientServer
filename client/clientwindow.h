@@ -27,6 +27,7 @@ private:
     Ui::ClientWindow *ui;
     QTcpSocket *socket;
     QByteArray Data;
+    bool connectSuccess;
     void createTree(QMap<QString, QVector<QMap<QString, QString>>> data);
     QMap<QString, QVector<QString>> getHeaders(QMap<QString, QVector<QMap<QString, QString>>> data);
     void SendToServer(QString str);
@@ -37,6 +38,7 @@ private:
                       QString nameTableParent,
                       QVector <QString> nameTables,
                       bool isHeader);
+    void checkCon();
 public slots:
     void slotReadyRead();
     void slotDeleteCon();

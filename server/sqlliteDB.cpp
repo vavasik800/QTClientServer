@@ -1,6 +1,5 @@
 #include "sqlliteDB.h"
 
-#include <QSqlField>
 
 
 SqlLiteDb::SqlLiteDb(QString pathFile)
@@ -21,10 +20,17 @@ void SqlLiteDb::setPath(QString pathFile)
     sdb = QSqlDatabase::addDatabase("QSQLITE");
     QFileInfo check_file(this->pathFile);
     runBd = check_file.exists(); // переменная для проверки запустилась ли БД
-    if(runBd){
-        sdb.setDatabaseName(this->pathFile);
-        runBd = sdb.open();
+    sdb.setDatabaseName(this->pathFile);
+    sdb.open();
+    if(!runBd){
+       runQuery(CREATE_TABLE_FILES, "create");
+       runQuery(CREATE_TABLE_BLOCK, "create");
+       runQuery(CREATE_TABLE_BOARD, "create");
+       runQuery(CREATE_TABLE_PORT, "create");
+       cout << "Create DB - " << qPrintable(check_file.absoluteFilePath()) << endl;
+       runBd = true;
     }
+
 }
 
 // Метод для select запроса
@@ -79,6 +85,13 @@ bool SqlLiteDb::runQueryUpdate(QString query)
     return updateQuery.exec(query);
 }
 
+// Метод для create запроса
+bool SqlLiteDb::runQueryCreate(QString query)
+{
+    QSqlQuery createQuery;
+    return createQuery.exec(query);
+}
+
 // Универсальный метод для разных типов запросов
 QVector<QMap<QString, QString>> SqlLiteDb::runQuery(QString query, QString typeQuery)
 {
@@ -108,6 +121,13 @@ QVector<QMap<QString, QString>> SqlLiteDb::runQuery(QString query, QString typeQ
     }
     else if (typeQuery == "select") {
         result = runQuerySelect(query);
+    }
+    else if(typeQuery == "create") {
+        if(!runQueryCreate(query)) {
+            cout << "Bad Create!" << endl;
+            error["error"] = "Bad Create!";
+            result.push_back(error);
+        }
     }
     return result;
 }

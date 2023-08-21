@@ -15,6 +15,7 @@
 #include <QSqlRecord>
 #include <QVariant>
 #include <QFileInfo>
+#include <QSqlField>
 #include <iostream>
 
 #include "sqlQueries.h" // файл с шаблонами для запросов
@@ -32,6 +33,7 @@ public:
     QVector<QMap<QString, QString>> runQuerySelect(QString query);
     bool runQueryInsert(QString query);
     bool runQueryUpdate(QString query);
+    bool runQueryCreate(QString query);
     bool runQueryInsert(QString tableName, QMap<QString, QString> data);
     bool runQueryDelete(QString query);
     QVector<QMap<QString, QString>> runQuery(QString query, QString typeQuery);

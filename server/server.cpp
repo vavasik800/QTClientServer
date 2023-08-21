@@ -18,6 +18,7 @@ Server::Server(QString dirForFiles, QString pathFileDb) {
 // Проверяет файлы в каталоге на изменения каждые 20 секунд.
 void Server::runServer()
 {
+
     onTimeout();
     QTimer* timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
@@ -217,7 +218,7 @@ QString Server::getHashFile(QString pathFile)
 }
 
 void Server::incomingConnection(qintptr socketDescriptor){
-    qDebug() << "client77777777777" << socketDescriptor;
+    qDebug() << "client" << socketDescriptor;
     socket = new QTcpSocket;
     socket->setSocketDescriptor(socketDescriptor);
     connect(socket, &QTcpSocket::readyRead, this, &Server::slotReadyRead);

@@ -18,6 +18,37 @@
 #define SELECT_BLOCK "select id, Name,MtR,MtC,Label,IP,Description,BoardCount from block"
 #define SELECT_ALL "select * from %1"
 
+#define CREATE_TABLE_FILES "CREATE TABLE files (id   INTEGER PRIMARY KEY AUTOINCREMENT,\
+                                                name TEXT,\
+                                                path TEXT,\
+                                                hash TEXT);"
+
+#define CREATE_TABLE_BLOCK "CREATE TABLE block (uid         INTEGER PRIMARY KEY AUTOINCREMENT,\
+                                                id          INTEGER UNIQUE,\
+                                                Name        TEXT,\
+                                                MtR         TEXT,\
+                                                MtC         TEXT,\
+                                                Label       TEXT,\
+                                                IP          TEXT,\
+                                                Description TEXT,\
+                                                BoardCount  INTEGER);"
+
+#define CREATE_TABLE_BOARD "CREATE TABLE board (uid       INTEGER PRIMARY KEY AUTOINCREMENT,\
+                                                id        INTEGER UNIQUE,\
+                                                Algoritms TEXT,\
+                                                IntLinks  TEXT,\
+                                                Name      TEXT,\
+                                                Num       INTEGER,\
+                                                PortCount INTEGER,\
+                                                id_block  INTEGER REFERENCES block (id) ON DELETE CASCADE);"
+
+#define CREATE_TABLE_PORT "CREATE TABLE port (uid      INTEGER PRIMARY KEY AUTOINCREMENT,\
+                                              id       INTEGER,\
+                                              Num      TEXT,\
+                                              Media    TEXT,\
+                                              Signal   TEXT,\
+                                              id_board INTEGER REFERENCES board (id) ON DELETE CASCADE);"
+
 
 #define TABLES_FOR_SEARCH "block,board,port"
 
